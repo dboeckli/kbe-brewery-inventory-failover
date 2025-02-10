@@ -1,5 +1,7 @@
 package ch.dboeckli.springframeworkguru.kbe.inventory.failover.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,52 +9,58 @@ import org.springframework.boot.info.BuildProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.reactive.server.EntityExchangeResult;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Objects;
 
 @DirtiesContext
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@ActiveProfiles("it-test")
 @Slf4j
-class ActuatorInfoIT {
+class ActuatorInfoTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private WebTestClient webTestClient;
 
     @Autowired
-    private BuildProperties buildProperties;
-    
-    @Test
-    void actuatorInfoTest() throws Exception {
-        MvcResult result = mockMvc.perform(get("/actuator/info"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.git.commit.id").isString())
-            
-            .andExpect(jsonPath("$.build.javaVersion").value("21"))
-            .andExpect(jsonPath("$.build.commit-id").isString())
-            .andExpect(jsonPath("$.build.javaVendor").isString())
-            .andExpect(jsonPath("$.build.artifact").value(buildProperties.getArtifact()))
-            .andExpect(jsonPath("$.build.group").value(buildProperties.getGroup()))
-            .andReturn();
-        
-        log.info("Response: {}", result.getResponse().getContentAsString());
-    }
+    BuildProperties buildProperties;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
-    void actuatorHealthTest() throws Exception {
-        MvcResult result = mockMvc.perform(get("/actuator/health/readiness"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("UP"))
-            .andReturn();
+    void actuatorInfoTest() throws JsonProcessingException {
+        EntityExchangeResult<byte[]> result = webTestClient.get().uri("/actuator/info")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.git.commit.id").isNotEmpty()
+            .jsonPath("$.build.javaVersion").isEqualTo("21")
+            .jsonPath("$.build.commit-id").isNotEmpty()
+            .jsonPath("$.build.javaVendor").isNotEmpty()
+            .jsonPath("$.build.artifact").isEqualTo(buildProperties.getArtifact())
+            .jsonPath("$.build.group").isEqualTo(buildProperties.getGroup())
+            .returnResult();
 
-        log.info("Response: {}", result.getResponse().getContentAsString());
+        String jsonResponse = new String(Objects.requireNonNull(result.getResponseBody()));
+        Object json = objectMapper.readValue(jsonResponse, Object.class);
+        log.info("Response:\n{}", objectMapper.writeValueAsString(json));
     }
 
-    
+
+    @Test
+    void actuatorHealthTest() throws JsonProcessingException {
+        EntityExchangeResult<byte[]> result = webTestClient.get().uri("/actuator/health/readiness")
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody()
+            .jsonPath("$.status").isEqualTo("UP")
+            .returnResult();
+
+        String jsonResponse = new String(Objects.requireNonNull(result.getResponseBody()));
+        Object json = objectMapper.readValue(jsonResponse, Object.class);
+        log.info("Response:\n{}", objectMapper.writeValueAsString(json));
+    }
+
 }
