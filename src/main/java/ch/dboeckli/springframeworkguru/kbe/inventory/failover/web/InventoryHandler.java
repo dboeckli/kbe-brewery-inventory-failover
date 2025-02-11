@@ -1,6 +1,6 @@
 package ch.dboeckli.springframeworkguru.kbe.inventory.failover.web;
 
-import ch.dboeckli.springframeworkguru.kbe.inventory.failover.dto.BeerInventoryDto;
+import ch.guru.springframework.kbe.lib.dto.BeerInventoryDto;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
