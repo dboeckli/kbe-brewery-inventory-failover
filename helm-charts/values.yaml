@@ -28,12 +28,6 @@ resources:
     cpu: 250m
     memory: 512Mi
 
-spring:
-  profiles:
-    active: mysql
-  oauth2ResourceServer:
-    issuerUri: ""
-
 probes:
   startup:
     failureThreshold: 30
@@ -46,37 +40,6 @@ probes:
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 6
-
-mysql:
-  enabled: true
-
-  database: beerservice
-
-  port: 3306
-  targetPort: 3306
-  nodePort: 30306
-
-  user: user
-  password: dbpassword
-
-  rootPassword: dbpassword
-
-  serviceFQDN: "kbe-brewery-inventory-failover-mysql.kbe-brewery-inventory-failover.svc.cluster.local"
-
-jms:
-  enabled: true
-
-  broker:
-    port: 61616
-    nodePort: 30616
-  console:
-    port: 8161
-    nodePort: 30161
-
-  user: artemis
-  password: simetraehcapa
-
-  serviceFQDN: "kbe-brewery-inventory-failover-jms.kbe-brewery-inventory-failover.svc.cluster.local"
 
 ingress:
   enabled: false
