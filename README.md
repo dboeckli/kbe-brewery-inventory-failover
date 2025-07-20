@@ -86,6 +86,11 @@ delete all
 kubectl delete all --all -n kbe-brewery-inventory-failover
 ```
 
+create busybox sidecar
+```powershell
+kubectl run busybox-test --rm -it --image=busybox:1.36 --namespace=kbe-brewery-inventory-failover --command -- sh
+```
+
 
 You can use the actuator rest call to verify via port 30083
 
