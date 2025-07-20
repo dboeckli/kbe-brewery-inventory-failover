@@ -1,6 +1,5 @@
-package ch.dboeckli.springframeworkguru.kbe.inventory.failover.config;
+package ch.dboeckli.springframeworkguru.kbe.inventory.failover.web;
 
-import ch.dboeckli.springframeworkguru.kbe.inventory.failover.web.InventoryHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -12,7 +11,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
-public class RouterConfig {
+public class InventoryHandlerRouterFunction {
 
     @Bean
     public RouterFunction<ServerResponse> orderRouter(InventoryHandler handler) {
