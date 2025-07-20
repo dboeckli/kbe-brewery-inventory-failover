@@ -10,7 +10,7 @@
 
     <groupId>ch.dboeckli.springframeworkguru.kbe.sb-services</groupId>
     <artifactId>kbe-brewery-inventory-failover</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <name>${project.artifactId}</name>
     <description>${project.artifactId}</description>
@@ -23,7 +23,7 @@
         <connection>scm:git:https://github.com/${project.organization.name}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:https://github.com/${project.organization.name}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${project.organization.name}/${project.artifactId}.git</url>
-        <tag>HEAD</tag>
+        <tag>kbe-brewery-inventory-failover-0.0.1</tag>
     </scm>
 
     <properties>
@@ -350,10 +350,7 @@
                                     <entry key="helm.chart.version" value="v${project.version}" />
                                 </propertyfile>
                                 <!--suppress UnresolvedMavenProperty: git.commit.id.abbrev is set by git git-commit-id-maven-plugin -->
-                                <replaceregexp file="${project.build.directory}/helm.properties"
-                                               match="helm\.chart\.version=(v[0-9]+\.[0-9]+\.[0-9]+)_.*-SNAPSHOT"
-                                               replace="helm.chart.version=\1-${git.commit.id.abbrev}"
-                                               byline="true" />
+                                <replaceregexp file="${project.build.directory}/helm.properties" match="helm\.chart\.version=(v[0-9]+\.[0-9]+\.[0-9]+)_.*-SNAPSHOT" replace="helm.chart.version=\1-${git.commit.id.abbrev}" byline="true" />
                                 <property file="${project.build.directory}/helm.properties" />
                             </target>
                         </configuration>
