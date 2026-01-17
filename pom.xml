@@ -38,7 +38,7 @@
         <spring-cloud.version>2025.1.0</spring-cloud.version>
 
         <!-- our dependencies -->
-        <kbe-brewery-lib.version>0.0.3</kbe-brewery-lib.version>
+        <kbe-brewery-lib.version>0.0.4</kbe-brewery-lib.version>
 
         <github.acions.build>false</github.acions.build>
         <skip.docker.build>false</skip.docker.build>
