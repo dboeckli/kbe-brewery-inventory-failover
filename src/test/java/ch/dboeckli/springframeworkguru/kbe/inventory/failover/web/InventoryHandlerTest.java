@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @WebFluxTest
-@Import({InventoryHandler.class, InventoryHandlerRouterFunction.class})
+@Import({ InventoryHandler.class, InventoryHandlerRouterFunction.class })
 @Slf4j
 class InventoryHandlerTest {
 
@@ -34,11 +34,14 @@ class InventoryHandlerTest {
             .uri("/inventory-failover")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
-            .expectStatus().isOk()
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectStatus()
+            .isOk()
+            .expectHeader()
+            .contentType(MediaType.APPLICATION_JSON)
             .expectBodyList(BeerInventoryDto.class)
             .consumeWith(result -> {
-                String jsonResponse = new String(Objects.requireNonNull(result.getResponseBodyContent()), StandardCharsets.UTF_8);
+                String jsonResponse = new String(Objects.requireNonNull(result.getResponseBodyContent()),
+                        StandardCharsets.UTF_8);
                 log.info("Response:\n{}", pretty(jsonResponse));
             })
             .value(list -> {
@@ -56,7 +59,8 @@ class InventoryHandlerTest {
         try {
             Object json = objectMapper.readValue(jsonResponse, Object.class);
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             // Falls kein valides JSON: unverändert zurückgeben
             return jsonResponse;
         }

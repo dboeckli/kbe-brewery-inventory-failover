@@ -1,15 +1,14 @@
+---
 server:
   port: 8083
-
 spring:
   application:
-    name: kbe-brewery-inventory-failover
+    name: "kbe-brewery-inventory-failover"
   docker:
     compose:
       enabled: false
       stop:
-        command: down
-
+        command: "down"
 management:
   health:
     readinessstate:
@@ -18,20 +17,17 @@ management:
       enabled: true
   endpoints:
     access:
-      default: unrestricted
+      default: "unrestricted"
     web:
       exposure:
         include: "*"
   endpoint:
     configprops:
-      # WARNING: SECURITY RISK - DO NOT USE IN PRODUCTION ENVIRONMENT
-      # This configuration exposes sensitive data and should only be used for development or testing purposes.
-      # Ensure this is disabled in any environment where security is a concern.
-      show-values: ALWAYS
+      show-values: "ALWAYS"
     health:
       probes:
         enabled: true
-      show-details: always
+      show-details: "always"
   info:
     build:
       enabled: true
@@ -43,22 +39,21 @@ management:
       enabled: true
     git:
       enabled: true
-      mode: full
+      mode: "full"
   httpexchanges:
     recording:
       enabled: true
-      include: request_headers, response_headers, session_id, time_taken
+      include: "request_headers, response_headers, session_id, time_taken"
   observations:
     annotations:
       enabled: true
     http:
       server:
         requests:
-          name: http.server.requests
+          name: "http.server.requests"
       client:
         requests:
-          name: http-client-requests
-
+          name: "http-client-requests"
   otlp:
     metrics:
       export:
@@ -69,7 +64,6 @@ management:
         enabled: false
     sampling:
       probability: 1.0
-
   logging:
     export:
       enabled: false

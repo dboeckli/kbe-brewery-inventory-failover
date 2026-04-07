@@ -17,4 +17,5 @@ public class InventoryHandlerRouterFunction {
     public RouterFunction<ServerResponse> orderRouter(InventoryHandler handler) {
         return route(GET("/inventory-failover").and(accept(APPLICATION_JSON)), handler::listInventory);
     }
+
 }
