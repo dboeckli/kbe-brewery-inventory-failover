@@ -275,25 +275,16 @@
               <exclude>target/**</exclude>
               <exclude>**/node_modules/**</exclude>
               <exclude>.github/**</exclude>
+              <exclude>.idea</exclude>
             </excludes>
-            <jackson>
-              <version>2.21.2</version>
-            </jackson>
+            <prettier/>
           </json>
           <yaml>
             <includes>
-              <include>**/*.yaml</include>
-              <include>**/*.yml</include>
+              <include>src/main/resources/application*.yaml</include>
+              <include>src/main/resources/application*.yml</include>
             </includes>
-            <excludes>
-              <exclude>target/**</exclude>
-              <exclude>**/node_modules/**</exclude>
-              <exclude>helm-charts/**</exclude>
-              <exclude>.github/**</exclude>
-            </excludes>
-            <jackson>
-              <version>2.21.2</version>
-            </jackson>
+            <prettier/>
           </yaml>
           <shell>
             <includes>
