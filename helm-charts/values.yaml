@@ -4,6 +4,9 @@ global:
   springDebug: false
   namespace: kbe-brewery-inventory-failover
 
+nameOverride: "kbe-brewery-inventory-failover"
+fullnameOverride: "kbe-brewery-inventory-failover"
+
 replicaCount: 1
 
 image:

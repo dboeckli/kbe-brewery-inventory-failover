@@ -59,7 +59,7 @@ cd target/helm/repo
 unpack
 
 ```powershell
-$file = Get-ChildItem -Filter kbe-brewery-inventory-failover-v*.tgz | Select-Object -First 1
+$file = Get-ChildItem -Filter kbe-brewery-inventory-failover-chart-*.tgz | Select-Object -First 1
 tar -xvf $file.Name
 ```
 
@@ -107,6 +107,36 @@ kubectl run busybox-test --rm -it --image=busybox:1.36 --namespace=kbe-brewery-i
 ```
 
 You can use the actuator rest call to verify via port 30083
+
+## Sandbox (local dev environment)
+
+The sandbox is provisioned by the opencode-sandbox-kit and runs as a Docker container. It mounts this
+repo, starts opencode, and connects the IntelliJ MCP server. The app runs standalone (no upstream
+services, no `compose.yaml`) on port 8083.
+
+Allow the kit source (GitHub without cloning):
+
+```powershell
+sbx settings set kit.allowedSources --% "[\"docker.io/\",\"github.com/dboeckli/\"]"
+```
+
+Start a new sandbox:
+
+```powershell
+sbx run opencode --name kbe-brewery-inventory-failover --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" "C:\development\projects\kbe-brewery-inventory-failover"
+```
+
+Start the sandbox with Kubernetes support:
+
+```powershell
+sbx run opencode --name kbe-brewery-inventory-failover --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" "C:\development\projects\kbe-brewery-inventory-failover" "$env:USERPROFILE\.kube:ro"
+```
+
+Apply the kit to an existing sandbox (restarts the sandbox, VM state is kept):
+
+```powershell
+sbx kit add kbe-brewery-inventory-failover "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent"
+```
 
 ## Contributing
 
