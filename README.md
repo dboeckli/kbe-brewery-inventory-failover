@@ -1,112 +1,96 @@
-# SFG Beer Works - Brewery Microservices
+# kbe-brewery-inventory-failover
 
-This project has a services of microservices for deployment via Docker Compose and Kubernetes and is one element of the KBE.
-See Gateway Project for Detailed description:
-https://github.com/dboeckli/kbe-brewery-gateway/blob/master/README.md
+Spring Boot 4 (4.1.1) / Spring Framework 6 reactive **WebFlux** failover service for the brewery
+inventory microservices (KBE) on **Java 25**. It exposes a functional endpoint
+(`/inventory-failover`, `RouterFunction`/`Handler`) that returns a static `BeerInventoryDto` list
+(from `kbe-brewery-lib`) and is packaged as a Docker image and a Helm chart.
 
-This project has been upgraded to spring boot 3.4.1 and not been tested!
 Original git repository: https://github.com/springframeworkguru/kbe-sb-microservices.git
 
-## Deployment
-
-### Deployment with Kubernetes
-
-To run maven filtering for destination target/k8s
+## Build
 
 ```bash
-mvn clean install -DskipTests 
+./mvnw clean verify
 ```
 
-Deployment goes into the default namespace.
+- Runs unit (`*Test`) + IT (`*IT`) tests, Helm lint/template and format checks
+  (spring-javaformat + spotless).
+- `./mvnw clean install` additionally builds the Docker image and packages the Helm chart into
+  `target/helm/repo/`. Skip the Docker build with `-Dskip.docker.build=true` /
+  `-Dskip.start.stop.springboot=true`.
+- Start locally: `./mvnw spring-boot:run` (app on `:8083`).
 
-To deploy all resources:
+## Deployment with Helm
+
+The chart is deployed into the namespace `kbe-brewery-inventory-failover` and exposed via
+NodePort `30083`.
+
+Build and package the chart:
 
 ```bash
-kubectl apply -f target/k8s/
+./mvnw clean install -Dskip.start.stop.springboot=true -Dskip.docker.build=true
 ```
 
-To remove all resources:
-
-```bash
-kubectl delete -f target/k8s/
-```
-
-Check
-
-```bash
-kubectl get deployments -o wide
-kubectl get pods -o wide
-```
-
-You can use the actuator rest call to verify via port 30080
-
-### Deployment with Helm
-
-Be aware that we are using a different namespace here (not default).
-
-To run maven filtering for destination target/helm
-
-```bash
-mvn clean install -DskipTests 
-```
-
-Go to the directory where the tgz file has been created after 'mvn install'
+Go to the directory where the tgz file has been created:
 
 ```powershell
 cd target/helm/repo
 ```
 
-unpack
+Unpack:
 
 ```powershell
 $file = Get-ChildItem -Filter kbe-brewery-inventory-failover-chart-*.tgz | Select-Object -First 1
 tar -xvf $file.Name
 ```
 
-install
+Install:
 
 ```powershell
 $APPLICATION_NAME = Get-ChildItem -Directory | Where-Object { $_.LastWriteTime -ge $file.LastWriteTime } | Select-Object -ExpandProperty Name
-helm upgrade --install $APPLICATION_NAME ./$APPLICATION_NAME --namespace kbe-brewery-inventory-failover --create-namespace --wait --timeout 5m --debug --render-subchart-notes
+helm upgrade --install $APPLICATION_NAME ./$APPLICATION_NAME --namespace kbe-brewery-inventory-failover --create-namespace --wait --timeout 8m --debug --render-subchart-notes
 ```
 
-show logs
+Show logs (replace `$POD` with the pods from the command below):
 
 ```powershell
-kubectl get pods -l app.kubernetes.io/name=$APPLICATION_NAME -n kbe-brewery-inventory-failover
-```
-
-replace $POD with pods from the command above
-
-```powershell
+kubectl get pods -l app.kubernetes.io/name=kbe-brewery-inventory-failover -n kbe-brewery-inventory-failover
 kubectl logs $POD -n kbe-brewery-inventory-failover --all-containers
 ```
 
-test
+Test:
 
 ```powershell
 helm test $APPLICATION_NAME --namespace kbe-brewery-inventory-failover --logs
 ```
 
-uninstall
+Uninstall:
 
 ```powershell
 helm uninstall $APPLICATION_NAME --namespace kbe-brewery-inventory-failover
 ```
 
-delete all
+Delete all:
 
 ```powershell
 kubectl delete all --all -n kbe-brewery-inventory-failover
 ```
 
-create busybox sidecar
+Create a busybox sidecar:
 
 ```powershell
-kubectl run busybox-test --rm -it --image=busybox:1.36 --namespace=kbe-brewery-inventory-failover --command -- sh
+kubectl run busybox-test --rm -it --image=busybox:1.37.0 --namespace=kbe-brewery-inventory-failover --command -- sh
 ```
 
-You can use the actuator rest call to verify via port 30083
+Verify the actuator and the endpoint via NodePort `30083`:
+
+```bash
+curl http://localhost:30083/actuator/health
+curl http://localhost:30083/inventory-failover
+```
+
+The IntelliJ run configurations in `.run/` (`deploy-k8s`, `test-k8s`, `uninstall-k8s`,
+`clear-docker`) wrap the scripts in `.run/scripts/` for the same workflow.
 
 ## Sandbox (local dev environment)
 
