@@ -7,6 +7,35 @@ inventory microservices (KBE) on **Java 25**. It exposes a functional endpoint
 
 Original git repository: https://github.com/springframeworkguru/kbe-sb-microservices.git
 
+## Architecture Overview
+
+```mermaid
+graph LR
+    Beer["Beer Microservice :8080"]
+
+    subgraph Failover ["kbe-brewery-inventory-failover :8083"]
+        Route["RouterFunction\nGET /inventory-failover"]
+        Handler["InventoryHandler"]
+        DTO["static BeerInventoryDto\nquantityOnHand: 999"]
+    end
+
+    Beer -.->|"fallback on failure"| Route
+    Route --> Handler
+    Handler --> DTO
+```
+
+### Role of the services
+
+**kbe-brewery-inventory-failover** (:8083) — a stateless dummy fallback for the beer inventory.
+It is a reactive WebFlux service that exposes a single functional endpoint
+`GET /inventory-failover` (`InventoryHandlerRouterFunction`). The `InventoryHandler` always returns
+a hardcoded list with a single `BeerInventoryDto` (`quantityOnHand: 999`, no real beer reference).
+It uses neither a database nor queues, so it is always available.
+
+The beer microservice (`kbe-brewery-beer-micro-service`) only calls it when the primary inventory
+service is unreachable (`BeerInventoryServiceImpl` catch block), so the order process stays
+functional even when the real inventory is down.
+
 ## Build
 
 ```bash
