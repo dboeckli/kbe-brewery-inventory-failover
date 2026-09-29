@@ -138,7 +138,7 @@ Start a new sandbox:
 ```powershell
 sbx run opencode `
     --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
-    --template docker.io/domboeckli/sbx-opencode-tooling:latest `
+    --template docker.cloudsmith.io/dboeckli/sbx/sbx-opencode-tooling:latest `
     --skills=off `
     --static-mcp idea `
     . `
@@ -150,7 +150,7 @@ Start the sandbox with Kubernetes support:
 ```powershell
 sbx run opencode `
     --kit "git+https://github.com/dboeckli/opencode-sandbox-kit.git#dir=opencode-agent" `
-    --template docker.io/domboeckli/sbx-opencode-tooling:latest `
+    --template docker.cloudsmith.io/dboeckli/sbx/sbx-opencode-tooling:latest `
     --skills=off `
     --static-mcp idea `
     . `
