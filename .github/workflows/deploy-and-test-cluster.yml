@@ -257,10 +257,11 @@ jobs:
       contents: read
       pages: write
       id-token: write
+      actions: read
 
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.deployment-retry.outputs.page_url }}
 
     concurrency:
       group: pages
@@ -313,8 +314,40 @@ jobs:
           # Unique per attempt: re-runs would otherwise leave a second "github-pages" artifact.
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
 
+      # deploy-pages resolves the artifact through the Actions artifact index,
+      # which can lag a few seconds behind a finalized upload. Without this wait
+      # the deployment intermittently fails with "No artifacts named ... were
+      # found" even though the upload succeeded.
+      - name: Wait for Pages artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o nounset
+          set -o errexit
+
+          artifact_name="github-pages-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          for attempt in $(seq 1 36); do
+            if gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" \
+              --paginate --jq '.artifacts[].name' | grep -Fxq "$artifact_name"; then
+              echo "Pages artifact $artifact_name is listed (attempt $attempt)"
+              exit 0
+            fi
+            echo "Pages artifact $artifact_name not listed yet (attempt $attempt), retrying in 5s..."
+            sleep 5
+          done
+          echo "::error::Pages artifact $artifact_name was not listed within 180s"
+          exit 1
+
       - name: Deploy to GitHub Pages
         id: deployment
+        continue-on-error: true
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Retry GitHub Pages deployment
+        id: deployment-retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         with:
           artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
@@ -322,7 +355,7 @@ jobs:
       - name: Add report link to summary
         if: always()
         env:
-          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url || steps.deployment-retry.outputs.page_url }}
         run: |
           if [[ -n "${PAGE_URL:-}" ]]; then
             echo "### Bruno reports" >> "$GITHUB_STEP_SUMMARY"
