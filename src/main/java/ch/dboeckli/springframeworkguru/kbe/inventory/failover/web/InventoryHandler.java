@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -25,8 +26,8 @@ public class InventoryHandler {
                 .id(UUID.randomUUID())
                 .beerId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                 .quantityOnHand(999)
-                .createdDate(OffsetDateTime.now())
-                .lastModifiedDate(OffsetDateTime.now())
+                .createdDate(OffsetDateTime.now(ZoneOffset.UTC))
+                .lastModifiedDate(OffsetDateTime.now(ZoneOffset.UTC))
                 .build())), List.class);
     }
 
